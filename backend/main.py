@@ -24,7 +24,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "http://localhost:5173",
-    "https://note-taking-app-jwt-2.onrender.com/"
+    "https://note-taking-app-jwt-2.onrender.com/",
     os.getenv("FRONTEND_URL", ""),
 ]
 
