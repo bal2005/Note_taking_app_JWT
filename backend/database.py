@@ -1,13 +1,20 @@
 import os
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from pymongo import MongoClient
 
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./notes.db")
+MONGO_URL = "mongodb+srv://bala5mohan2005_db_user:2mCnoXSt1IVxJ9ec@clusternotes.mea3g2z.mongodb.net/"
+DB_NAME = "notesdb"
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+client = MongoClient(MONGO_URL)
+db = client[DB_NAME]
 
-Base = declarative_base()
+# Collections
+users_collection = db["users"]
+notes_collection = db["notes"]
+
+# Ensure indexes
+users_collection.create_index("username", unique=True)
+notes_collection.create_index("owner_id")
+
+print("Connected to:", MONGO_URL)
+print("Database name:", DB_NAME)
+
