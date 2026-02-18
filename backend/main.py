@@ -70,7 +70,7 @@ def create_note(
     note: schemas.NoteCreate,
     current_user: dict = Depends(auth.get_current_user),
 ):
-    return crud.create_user_note(note=note, owner_id=current_user["_id"])
+    return crud.create_user_note(note=note, owner_id=str(current_user["_id"]))
 
 @app.get("/notes/{note_id}", response_model=schemas.Note)
 def read_note(
