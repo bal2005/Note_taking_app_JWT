@@ -4,8 +4,8 @@ import { useApi } from '../context/ApiContext';
 import APILogger from './APILogger';
 
 const LoginForm = () => {
-    const [username, setUsername] = useState('admin');
-    const [password, setPassword] = useState('password123'); // Default for quick testing
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState(''); // Default for quick testing
     const { login } = useApi();
     const navigate = useNavigate();
     const [error, setError] = useState('');
