@@ -16,10 +16,12 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+import os
 # CORS
 origins = [
     "http://localhost:3000",
-    "http://localhost:5173", # Vite default
+    "http://localhost:5173",
+    os.getenv("FRONTEND_URL", ""),
 ]
 
 app.add_middleware(

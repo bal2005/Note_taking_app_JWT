@@ -1,0 +1,40 @@
+services:
+  # Backend
+  - type: web
+    name: notes-api
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:///./data/notes.db
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: FRONTEND_URL
+        fromService:
+          type: web
+          name: notes-frontend
+          property: host
+    disk:
+      name: sqlite-data
+      mountPath: /opt/render/project/src/backend/data
+      sizeGB: 1
+
+  # Frontend
+  - type: web
+    name: notes-frontend
+    runtime: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: notes-api
+          property: host
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
