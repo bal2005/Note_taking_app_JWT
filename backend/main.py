@@ -1,4 +1,5 @@
 import uvicorn
+import os
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
@@ -11,12 +12,14 @@ import crud
 import auth
 from database import engine, SessionLocal
 
+print("Starting Backend...")
 # Create database tables
 models.Base.metadata.create_all(bind=engine)
+print("Database tables ensured.")
+
 
 app = FastAPI()
 
-import os
 # CORS
 origins = [
     "http://localhost:3000",

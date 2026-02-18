@@ -23,19 +23,29 @@ export const ApiProvider = ({ children }) => {
     // Login handler
     const login = async (username, password) => {
         try {
-            const formData = new FormData();
-            formData.append('username', username);
-            formData.append('password', password);
+            console.log(`Attempting login for: ${username}`);
+            const params = new URLSearchParams();
+            params.append('username', username);
+            params.append('password', password);
 
-            const response = await api.post('/token', formData);
+            const response = await api.post('/token', params, {
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                }
+            });
+
             const { access_token } = response.data;
-
             localStorage.setItem('token', access_token);
             setToken(access_token);
-            setUser({ username }); // For simplicity, just store username
+            setUser({ username });
             return true;
         } catch (error) {
-            console.error("Login failed:", error);
+            const errorMsg = error.response?.data?.detail || error.message;
+            console.error("Login Error Details:", {
+                status: error.response?.status,
+                data: error.response?.data,
+                message: error.message
+            });
             return false;
         }
     };
