@@ -8,6 +8,7 @@ const NoteCard = ({ note, onDelete, onUpdate }) => {
     const [content, setContent] = useState(note.content);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const [isHovered, setIsHovered] = useState(false);
 
     const handleUpdate = async () => {
         try {
@@ -17,22 +18,23 @@ const NoteCard = ({ note, onDelete, onUpdate }) => {
             onUpdate(response.data);
             setIsEditing(false);
         } catch (err) {
-            setError('Failed to update note');
+            setError('Update failed');
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDelete = async () => {
-        if (!window.confirm('Are you sure you want to delete this note?')) return;
+    const handleDelete = async (e) => {
+        e.stopPropagation();
+        if (!window.confirm('Delete this note?')) return;
         try {
             setLoading(true);
             setError(null);
             await api.delete(`/notes/${note.id}`);
             onDelete(note.id);
         } catch (err) {
-            setError('Failed to delete note');
+            setError('Delete failed');
             console.error(err);
         } finally {
             setLoading(false);
@@ -40,59 +42,106 @@ const NoteCard = ({ note, onDelete, onUpdate }) => {
     };
 
     return (
-        <div style={{
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            padding: '16px',
-            margin: '8px',
-            backgroundColor: '#f9f9f9',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-        }}>
+        <div
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+            style={{
+                border: isHovered ? '1px solid #e8eaed' : '1px solid #5f6368',
+                borderRadius: '8px',
+                padding: '16px',
+                backgroundColor: '#202124',
+                position: 'relative',
+                transition: 'all 0.2s ease',
+                boxShadow: isHovered ? '0 1px 3px 0 rgba(0,0,0,0.6), 0 4px 8px 3px rgba(0,0,0,0.3)' : 'none',
+                minHeight: '100px',
+                cursor: 'default',
+                wordBreak: 'break-word'
+            }}
+        >
             {isEditing ? (
-                <div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <input
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        style={{ width: '100%', marginBottom: '8px', padding: '4px' }}
+                        placeholder="Title"
+                        style={{
+                            width: '100%',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            fontSize: '1.1em',
+                            fontWeight: '500',
+                            color: '#fff',
+                            padding: '0'
+                        }}
                     />
                     <textarea
                         value={content}
                         onChange={(e) => setContent(e.target.value)}
-                        style={{ width: '100%', minHeight: '100px', marginBottom: '8px', padding: '4px' }}
+                        placeholder="Content"
+                        style={{
+                            width: '100%',
+                            minHeight: '80px',
+                            backgroundColor: 'transparent',
+                            border: 'none',
+                            color: '#e8eaed',
+                            padding: '0',
+                            resize: 'vertical'
+                        }}
                     />
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={handleUpdate} disabled={loading} style={{
-                            backgroundColor: '#28a745', color: 'white', padding: '4px 8px', border: 'none', borderRadius: '4px', cursor: 'pointer'
-                        }}>
-                            {loading ? 'Saving...' : 'Save'}
-                        </button>
-                        <button onClick={() => setIsEditing(false)} disabled={loading} style={{
-                            backgroundColor: '#6c757d', color: 'white', padding: '4px 8px', border: 'none', borderRadius: '4px', cursor: 'pointer'
-                        }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '10px' }}>
+                        <button
+                            onClick={() => setIsEditing(false)}
+                            style={{ backgroundColor: 'transparent', color: '#9aa0a6' }}
+                        >
                             Cancel
+                        </button>
+                        <button
+                            onClick={handleUpdate}
+                            disabled={loading}
+                            style={{
+                                backgroundColor: '#a142f4',
+                                color: 'white',
+                                padding: '6px 16px',
+                                borderRadius: '4px'
+                            }}
+                        >
+                            {loading ? '...' : 'Save'}
                         </button>
                     </div>
                 </div>
             ) : (
-                <div>
-                    <h3 style={{ margin: '0 0 8px 0', color: '#333' }}>{title}</h3>
-                    <p style={{ margin: '0 0 16px 0', color: '#666', whiteSpace: 'pre-wrap' }}>{content}</p>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={() => setIsEditing(true)} style={{
-                            backgroundColor: '#007bff', color: 'white', padding: '4px 8px', border: 'none', borderRadius: '4px', cursor: 'pointer'
-                        }}>
-                            Edit
+                <div onClick={() => setIsEditing(true)}>
+                    {title && <h3 style={{ margin: '0 0 10px 0', fontSize: '1.1em', color: '#fff' }}>{title}</h3>}
+                    <p style={{ margin: 0, color: '#e8eaed', fontSize: '1em', whiteSpace: 'pre-wrap' }}>{content}</p>
+
+                    <div style={{
+                        marginTop: '20px',
+                        display: 'flex',
+                        justifyContent: 'flex-end',
+                        gap: '15px',
+                        opacity: isHovered ? 1 : 0,
+                        transition: 'opacity 0.2s ease'
+                    }}>
+                        <button
+                            onClick={(e) => { e.stopPropagation(); setIsEditing(true); }}
+                            title="Edit"
+                            style={{ background: 'transparent', padding: '4px', color: '#9aa0a6' }}
+                        >
+                            ✎
                         </button>
-                        <button onClick={handleDelete} disabled={loading} style={{
-                            backgroundColor: '#dc3545', color: 'white', padding: '4px 8px', border: 'none', borderRadius: '4px', cursor: 'pointer'
-                        }}>
-                            {loading ? 'Deleting...' : 'Delete'}
+                        <button
+                            onClick={handleDelete}
+                            disabled={loading}
+                            title="Delete"
+                            style={{ background: 'transparent', padding: '4px', color: '#f28b82' }}
+                        >
+                            🗑
                         </button>
                     </div>
                 </div>
             )}
-            {error && <p style={{ color: 'red', fontSize: '0.9em', marginTop: '8px' }}>{error}</p>}
+            {error && <p style={{ color: '#f28b82', fontSize: '0.8em', marginTop: '10px' }}>{error}</p>}
         </div>
     );
 };
